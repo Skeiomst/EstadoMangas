@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: manga_backend
+    ports:
+      - "8000:8000"
+    # CRÍTICO PARA PLAYWRIGHT: Aumenta la memoria compartida.
+    # Los navegadores modernos crashean en Docker por defecto (64MB shm)
+    shm_size: '2gb'
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - manga-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: manga_frontend
+    ports:
+      - "3000:80" # Accederás en tu navegador por localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - manga-network
+
+networks:
+  manga-network:
+    driver: bridge
