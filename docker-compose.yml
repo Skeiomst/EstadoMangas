@@ -5,8 +5,6 @@ services:
     container_name: manga_backend
     ports:
       - "8000:8000"
-    # CRÍTICO PARA PLAYWRIGHT: Aumenta la memoria compartida.
-    # Los navegadores modernos crashean en Docker por defecto (64MB shm)
     shm_size: '2gb'
     environment:
       - PYTHONUNBUFFERED=1
@@ -18,11 +16,22 @@ services:
       context: ./frontend
     container_name: manga_frontend
     ports:
-      - "3000:80" # Accederás en tu navegador por localhost:3000
+      - "3000:80"
     depends_on:
       - backend
     networks:
       - manga-network
+
+  # --- AÑADIDO: TÚNEL AUTOMÁTICO ---
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: manga_tunnel
+    # Conecta internamente al puerto 80 del frontend
+    command: tunnel --url http://frontend:80
+    networks:
+      - manga-network
+    depends_on:
+      - frontend
 
 networks:
   manga-network:
